@@ -4,7 +4,8 @@ import { FormData, SajuResponse } from "../types";
 
 export const generateSajuReading = async (formData: FormData): Promise<SajuResponse> => {
   // 가이드라인에 따라 process.env.API_KEY를 직접 사용합니다.
-  const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
+
+  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY, });
   const isLove = formData.mode === 'LOVE';
 
   const systemInstruction = `
