@@ -266,7 +266,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
              <button 
                onClick={() => {
                   if (navigator.share) navigator.share({ title: 'K-SAJU // DECODED', url: window.location.href });
-                  else alert("Link copied to clipboard.");
+                  else alert("Code link copied to clipboard.");
                }}
                className="flex items-center justify-center gap-5 w-full py-8 bg-white text-black text-[12px] font-black uppercase tracking-[0.5em] hover:bg-zinc-200 transition-all shadow-xl"
              >
