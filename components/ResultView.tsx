@@ -1,7 +1,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { SajuResponse, WealthScore } from '../types';
-import { Lock, Unlock, Share2, Star, ChevronRight, Loader2, AlertCircle } from 'lucide-react';
+import { Lock, Unlock, Share2, Star, Loader2, AlertCircle } from 'lucide-react';
 import { PayPalButtons, usePayPalScriptReducer } from "@paypal/react-paypal-js";
 
 interface ResultViewProps {
@@ -18,6 +18,17 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
       window.scrollTo({ top: 0, behavior: 'smooth' });
     }
   }, [isUnlocked]);
+
+  // Global error listener for PayPal script errors that might not be caught by the component
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      if (event.message?.includes('paypal') || event.filename?.includes('paypal')) {
+        setSdkError("Payment script failed to initialize. Browser security may be blocking the gateway.");
+      }
+    };
+    window.addEventListener('error', handleError);
+    return () => window.removeEventListener('error', handleError);
+  }, []);
 
   const renderStars = (score?: WealthScore) => {
     const stars = score?.stars || 0;
@@ -192,6 +203,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
         </div>
       </div>
 
+      {/* Fix: data.mode is typed as 'love' | 'money', so comparing to 'LOVE' is invalid and unnecessary. */}
       {data.mode === 'love' ? renderLove() : renderWealthV2()}
 
       {!isUnlocked && (
@@ -226,19 +238,41 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
                   ) : (isRejected || sdkError) ? (
                     <div className="text-center p-4">
                       <AlertCircle className="w-6 h-6 text-red-900 mx-auto mb-2" />
-                      <p className="text-[10px] text-red-900 font-black uppercase mb-1">GATEWAY ERROR</p>
-                      <p className="text-[8px] text-zinc-500 mb-3">{sdkError || "Access Protocol Failed"}</p>
+                      <p className="text-[10px] text-red-900 font-black uppercase mb-1">GATEWAY BLOCKED</p>
+                      <p className="text-[8px] text-zinc-500 mb-3">{sdkError || "Access Protocol Refused by Environment"}</p>
                       <button onClick={() => window.location.reload()} className="text-[9px] font-black text-white uppercase border border-zinc-800 px-4 py-2 hover:bg-zinc-900">RE-INITIATE SESSION</button>
                     </div>
                   ) : (
                     <div className="w-full">
                       <PayPalButtons
                         style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay", tagline: false, height: 48 }}
-                        createOrder={(data, actions) => actions.order.create({ purchase_units: [{ amount: { value: currentPrice }, description: "SOUL CODE: FULL DECRYPTION" }] })}
-                        onApprove={async (data, actions) => { if (actions.order) { await actions.order.capture(); setIsUnlocked(true); } }}
+                        createOrder={(orderData, actions) => {
+                          try {
+                            // Fix: Added missing 'intent' property and fixed invalid comment syntax.
+                            return actions.order.create({ 
+                              intent: 'CAPTURE',
+                              purchase_units: [{ 
+                                amount: { 
+                                  currency_code: 'USD', 
+                                  value: currentPrice 
+                                }, 
+                                description: "SOUL CODE: FULL DECRYPTION" 
+                              }] 
+                            });
+                          } catch (err) {
+                            setSdkError("Unable to initialize transaction in this environment.");
+                            return Promise.reject(err);
+                          }
+                        }}
+                        onApprove={async (orderData, actions) => { 
+                          if (actions.order) { 
+                            await actions.order.capture(); 
+                            setIsUnlocked(true); 
+                          } 
+                        }}
                         onError={(err) => {
-                          console.error("PayPal Error:", err);
-                          setSdkError("Transaction Aborted or Script Conflict");
+                          console.error("PayPal Error Caught:", err);
+                          setSdkError("The payment gateway is inaccessible from this frame.");
                         }}
                       />
                     </div>
@@ -246,7 +280,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
                 </div>
 
                 <div className="space-y-2">
-                  <p className="text-[8px] text-zinc-700 text-center uppercase tracking-widest font-black">STUCK IN GATEWAY?</p>
+                  <p className="text-[8px] text-zinc-700 text-center uppercase tracking-widest font-black">CAN'T ACCESS GATEWAY?</p>
                   <button 
                     onClick={() => setIsUnlocked(true)}
                     className="w-full py-4 bg-zinc-900 text-white text-[10px] font-black uppercase tracking-[0.5em] hover:bg-zinc-800 transition-all flex items-center justify-center gap-2 group border border-red-900/50"
@@ -265,8 +299,13 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
              <h4 className="text-white font-heading font-black uppercase text-3xl mb-8 italic tracking-tighter">THE SOUL CODE</h4>
              <button 
                onClick={() => {
-                  if (navigator.share) navigator.share({ title: 'K-SAJU // DECODED', url: window.location.href });
-                  else alert("Code link copied to clipboard.");
+                  const url = window.location.href;
+                  if (navigator.share) {
+                    navigator.share({ title: 'K-SAJU // DECODED', url }).catch(() => {});
+                  } else {
+                    navigator.clipboard.writeText(url);
+                    alert("Code link copied to clipboard.");
+                  }
                }}
                className="flex items-center justify-center gap-5 w-full py-8 bg-white text-black text-[12px] font-black uppercase tracking-[0.5em] hover:bg-zinc-200 transition-all shadow-xl"
              >
