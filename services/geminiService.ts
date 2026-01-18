@@ -3,26 +3,27 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { FormData, SajuResponse } from "../types";
 
 export const generateSajuReading = async (formData: FormData): Promise<SajuResponse> => {
+  // 가이드라인에 따라 process.env.API_KEY를 직접 사용합니다.
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const isLove = formData.mode === 'LOVE';
 
-  // Optimized for gemini-flash-lite-latest
   const systemInstruction = `
-    You are 'THE SOUL CODE', a high-efficiency destiny analyst. 
-    Task: Decipher Saju charts with cinematic precision.
+    You are 'THE SOUL CODE', a high-speed premium destiny analyst.
     Tone: Sophisticated, insightful, direct. 
-    Constraints: 
-    1. STRICTLY ENGLISH only.
-    2. Use analytical terms like 'trajectory', 'glitch', 'synchronicity'.
-    3. ${isLove ? 'Focus on relationship synchronicity and future commitment odds.' : 'Focus on wealth peaks, career pivots, and risk management.'}
+    Constraint: STRICTLY ENGLISH. No other languages allowed.
+    Task: Decipher Saju charts and provide strategic life trajectory data.
+    ${isLove ? 'Focus: Relationship synchronicity and potential glitches.' : 'Focus: Wealth peaks, career pivots, and risk management.'}
+    
+    CRITICAL: Always return a valid JSON object matching the provided schema exactly.
   `;
 
   const prompt = `
-    INPUT: ${JSON.stringify(formData)}
-    QUERY: ${formData.finalQuestion}
+    Analyze User: ${JSON.stringify(formData.user)}
+    ${formData.partner ? `Analyze Partner: ${JSON.stringify(formData.partner)}` : ''}
+    Context: ${isLove ? formData.relationshipStatus : formData.occupation}
+    Inquiry: ${formData.finalQuestion}
 
-    GENERATE: A structured Saju analysis in JSON. 
-    CRITICAL: All content MUST be in English. Translate any traditional concepts to modern analytical English.
+    Generate a high-fidelity destiny analysis. Output in English only.
   `;
 
   const scoreSchema = {
@@ -35,8 +36,9 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
   };
 
   try {
+    // 텍스트 작업에 최적화된 gemini-3-flash-preview 모델 사용
     const response = await ai.models.generateContent({
-      model: "gemini-flash-lite-latest",
+      model: "gemini-3-flash-preview",
       contents: prompt,
       config: {
         systemInstruction: systemInstruction,
@@ -44,7 +46,7 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
         responseSchema: {
           type: Type.OBJECT,
           properties: {
-            mode: { type: Type.STRING },
+            mode: { type: Type.STRING, enum: ["LOVE", "MONEY"] },
             free: {
               type: Type.OBJECT,
               properties: {
@@ -61,22 +63,14 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
                 summary: { type: Type.STRING },
                 partner_instinctive_attraction: {
                   type: Type.OBJECT,
-                  properties: { 
-                    title: { type: Type.STRING }, 
-                    quote: { type: Type.STRING }, 
-                    why: { type: Type.STRING } 
-                  },
+                  properties: { title: { type: Type.STRING }, quote: { type: Type.STRING }, why: { type: Type.STRING } },
                   required: ["title", "quote", "why"]
                 },
                 score_breakdown: {
                   type: Type.ARRAY,
                   items: {
                     type: Type.OBJECT,
-                    properties: { 
-                      label: { type: Type.STRING }, 
-                      score: { type: Type.NUMBER }, 
-                      tier: { type: Type.STRING } 
-                    },
+                    properties: { label: { type: Type.STRING }, score: { type: Type.NUMBER }, tier: { type: Type.STRING } },
                     required: ["label", "score", "tier"]
                   }
                 },
@@ -84,12 +78,7 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
                   type: Type.ARRAY,
                   items: {
                     type: Type.OBJECT,
-                    properties: { 
-                      id: { type: Type.STRING }, 
-                      title: { type: Type.STRING }, 
-                      preview_quote: { type: Type.STRING }, 
-                      content: { type: Type.STRING } 
-                    },
+                    properties: { id: { type: Type.STRING }, title: { type: Type.STRING }, preview_quote: { type: Type.STRING }, content: { type: Type.STRING } },
                     required: ["id", "title", "preview_quote"]
                   }
                 }
@@ -118,20 +107,13 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
                   type: Type.ARRAY,
                   items: {
                     type: Type.OBJECT,
-                    properties: { 
-                      month: { type: Type.NUMBER }, 
-                      tag: { type: Type.STRING }, 
-                      text: { type: Type.STRING } 
-                    },
+                    properties: { month: { type: Type.NUMBER }, tag: { type: Type.STRING }, text: { type: Type.STRING } },
                     required: ["month", "tag", "text"]
                   }
                 },
                 monthly_locked: {
                   type: Type.OBJECT,
-                  properties: { 
-                    ctaTitle: { type: Type.STRING }, 
-                    ctaList: { type: Type.ARRAY, items: { type: Type.STRING } } 
-                  },
+                  properties: { ctaTitle: { type: Type.STRING }, ctaList: { type: Type.ARRAY, items: { type: Type.STRING } } },
                   required: ["ctaTitle", "ctaList"]
                 },
                 good_bad_2026: {
@@ -144,8 +126,7 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
                   },
                   required: ["title", "good", "bad", "note"]
                 }
-              },
-              required: ["title", "headline", "summary", "scores", "monthly_preview", "good_bad_2026"]
+              }
             },
             paywall: {
               type: Type.OBJECT,
@@ -154,20 +135,14 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
                 discount_price: { type: Type.STRING },
                 cta: { type: Type.STRING },
                 bullets: { type: Type.ARRAY, items: { type: Type.STRING } },
-                urgency: { type: Type.STRING },
-                disclaimer: { type: Type.STRING }
+                urgency: { type: Type.STRING }
               },
               required: ["discount_price", "bullets"]
             },
             share_card: {
               type: Type.OBJECT,
-              properties: { 
-                title: { type: Type.STRING }, 
-                subtitle: { type: Type.STRING },
-                tagline: { type: Type.STRING },
-                cta: { type: Type.STRING }
-              },
-              required: ["title", "subtitle", "tagline", "cta"]
+              properties: { title: { type: Type.STRING }, subtitle: { type: Type.STRING }, tagline: { type: Type.STRING }, cta: { type: Type.STRING } },
+              required: ["title", "cta"]
             }
           },
           required: ["mode", "free", "paywall", "share_card"]
@@ -175,11 +150,14 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
       }
     });
 
-    const text = response.text;
-    if (!text) throw new Error("No response text from Soul Code analyzer.");
-    return JSON.parse(text) as SajuResponse;
-  } catch (error) {
-    console.error("Gemini Flash Lite Error:", error);
-    throw error;
+    const resultText = response.text;
+    if (!resultText) throw new Error("Empty response from Soul Code engine.");
+    
+    // JSON 파싱 전 클리닝
+    const cleanJson = resultText.replace(/```json|```/g, "").trim();
+    return JSON.parse(cleanJson) as SajuResponse;
+  } catch (error: any) {
+    console.error("Gemini Critical Failure:", error);
+    throw new Error(error.message || "Decoding interrupted by cosmic interference.");
   }
 };
