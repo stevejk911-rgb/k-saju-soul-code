@@ -6,36 +6,37 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
   const ai = new GoogleGenAI({ apiKey: process.env.API_KEY });
   const isLove = formData.mode === 'LOVE';
 
+  // Optimized for gemini-flash-lite-latest
   const systemInstruction = `
-    You are 'THE SOUL CODE', a premium, high-fidelity destiny analyst.
-    TONE: Sophisticated, insightful, direct, and slightly cinematic. No fluff.
-    LANGUAGE: STRICTLY ENGLISH. All text, descriptions, and labels must be in English.
-    STYLE: Use modern terminology (e.g., 'trajectory', 'glitch', 'synchronicity', 'peak window').
-    ${isLove ? 'Focus on deep psychological compatibility and timeline odds.' : 'Focus on wealth windows, career pivots, and strategic risk management.'}
+    You are 'THE SOUL CODE', a high-efficiency destiny analyst. 
+    Task: Decipher Saju charts with cinematic precision.
+    Tone: Sophisticated, insightful, direct. 
+    Constraints: 
+    1. STRICTLY ENGLISH only.
+    2. Use analytical terms like 'trajectory', 'glitch', 'synchronicity'.
+    3. ${isLove ? 'Focus on relationship synchronicity and future commitment odds.' : 'Focus on wealth peaks, career pivots, and risk management.'}
   `;
 
   const prompt = `
-    Analyze this user profile: ${JSON.stringify(formData)}
-    Question: ${formData.finalQuestion}
+    INPUT: ${JSON.stringify(formData)}
+    QUERY: ${formData.finalQuestion}
 
-    Task: Generate a detailed Saju-based reading in JSON format.
-    CRITICAL: Everything must be in English. 
-    Translate any traditional Saju concepts into high-fidelity English analytical terms.
+    GENERATE: A structured Saju analysis in JSON. 
+    CRITICAL: All content MUST be in English. Translate any traditional concepts to modern analytical English.
   `;
 
-  // Define a fixed set of score properties to avoid "empty OBJECT properties" schema error
   const scoreSchema = {
     type: Type.OBJECT,
     properties: {
-      label: { type: Type.STRING, description: "Display label for this dimension" },
-      stars: { type: Type.NUMBER, description: "Score from 1 to 5" }
+      label: { type: Type.STRING },
+      stars: { type: Type.NUMBER }
     },
     required: ["label", "stars"]
   };
 
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: "gemini-flash-lite-latest",
       contents: prompt,
       config: {
         systemInstruction: systemInstruction,
@@ -175,10 +176,10 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
     });
 
     const text = response.text;
-    if (!text) throw new Error("No response text from Gemini");
+    if (!text) throw new Error("No response text from Soul Code analyzer.");
     return JSON.parse(text) as SajuResponse;
   } catch (error) {
-    console.error("Gemini Error:", error);
+    console.error("Gemini Flash Lite Error:", error);
     throw error;
   }
 };
