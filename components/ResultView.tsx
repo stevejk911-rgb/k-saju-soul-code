@@ -203,8 +203,8 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
         </div>
       </div>
 
-      {/* Fix: data.mode is typed as 'love' | 'money', so comparing to 'LOVE' is invalid and unnecessary. */}
-      {data.mode === 'love' ? renderLove() : renderWealthV2()}
+      {/* Fix: data.mode uses uppercase values 'LOVE' | 'MONEY' from SajuResponse. */}
+      {data.mode === 'LOVE' ? renderLove() : renderWealthV2()}
 
       {!isUnlocked && (
         <div className="fixed bottom-0 left-0 w-full p-6 z-[100] bg-gradient-to-t from-black via-black/95 to-transparent pt-32">
@@ -248,7 +248,7 @@ export const ResultView: React.FC<ResultViewProps> = ({ data }) => {
                         style={{ layout: "vertical", color: "gold", shape: "rect", label: "pay", tagline: false, height: 48 }}
                         createOrder={(orderData, actions) => {
                           try {
-                            // Fix: Added missing 'intent' property and fixed invalid comment syntax.
+                            // Fix: Added intent property to create order request
                             return actions.order.create({ 
                               intent: 'CAPTURE',
                               purchase_units: [{ 
