@@ -1,3 +1,4 @@
+
 export type Mode = 'LOVE' | 'MONEY' | null;
 
 export type Gender = 'M' | 'F' | 'Other' | 'Prefer not';
@@ -18,17 +19,36 @@ export interface FormData {
   finalQuestion: string;
 }
 
-export interface ScoreBreakdown {
+export interface WealthScore {
   label: string;
-  score: number;
-  tier: 'Low' | 'Okay' | 'High';
+  stars: number;
 }
 
-export interface TimelineEvent {
-  window: string;
-  theme: string;
-  best_action: string;
-  avoid: string;
+export interface MonthlyPreview {
+  month: number;
+  tag: string;
+  text: string;
+}
+
+export interface WealthResultV2 {
+  title: string;
+  badge: string;
+  headline: string;
+  summary: string;
+  element_hint: string;
+  scores: Record<string, WealthScore>;
+  monthly_preview: MonthlyPreview[];
+  monthly_locked: {
+    ctaTitle: string;
+    ctaList: string[];
+  };
+  good_bad_2026: {
+    title: string;
+    good: string[];
+    bad: string[];
+    note: string;
+  };
+  disclaimer: string;
 }
 
 export interface LoveResult {
@@ -40,7 +60,11 @@ export interface LoveResult {
     quote: string;
     why: string;
   };
-  score_breakdown: ScoreBreakdown[];
+  score_breakdown: {
+    label: string;
+    score: number;
+    tier: string;
+  }[];
   locked_sections: {
     id: string;
     title: string;
@@ -49,25 +73,14 @@ export interface LoveResult {
   }[];
 }
 
-export interface MoneyResult {
-  risk_map_title: string;
-  free_timeline: TimelineEvent[];
-  free_insight: string;
-  locked: {
-    next_move_checklist: string[];
-    danger_zones: string[];
-    highest_roi_habit: string;
-  };
-}
-
 export interface SajuResponse {
   mode: 'love' | 'money';
   free: {
     headline: string;
     one_liner: string;
   };
+  wealth_v2?: WealthResultV2;
   love_result?: LoveResult;
-  money_result?: MoneyResult;
   paywall: {
     price_anchor: string;
     discount_price: string;

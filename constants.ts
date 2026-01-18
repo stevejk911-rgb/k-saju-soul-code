@@ -1,3 +1,4 @@
+
 import { FormData } from './types';
 
 export const INITIAL_FORM_STATE: FormData = {
@@ -16,21 +17,21 @@ export const INITIAL_FORM_STATE: FormData = {
 
 export const STEPS_LOVE = [
   'Mode',
-  'Your Glitch',
+  'Your Profile',
   'The Target',
-  'The Mess',
-  'The Truth',
+  'The Situation',
+  'The Inquiry',
   'Decoding',
-  'Reality Check'
+  'Result'
 ];
 
 export const STEPS_MONEY = [
   'Mode',
-  'Your Glitch',
-  'The Grind',
-  'The Truth',
+  'Your Profile',
+  'The Context',
+  'The Inquiry',
   'Decoding',
-  'Reality Check'
+  'Result'
 ];
 
 export const COPY = {
@@ -38,45 +39,45 @@ export const COPY = {
   back: "GO BACK",
   mode: {
     title: "SPOILER ALERT.",
-    subtitle: "Anxious about your crush? Scared about money? Stop guessing. Read the ending.",
-    btn_love: "CRUSH\nFLIRTING\nLOVE",
-    btn_money: "CAREER\nMONEY\nWEALTH"
+    subtitle: "Stop guessing your future. Access the decoded trajectory of your love and wealth.",
+    btn_love: "CRUSH\nROMANCE\nLOVE",
+    btn_money: "CAREER\nSUCCESS\nWEALTH"
   },
   user_details: {
-    title: "WHO ARE YOU?",
-    subtitle: "Your birth chart reveals your glitches. Let's expose them.",
+    title: "YOUR IDENTITY",
+    subtitle: "Your birth chart is the source code of your destiny. Let's analyze it.",
     name_ph: "Your Name",
     cta: "NEXT >"
   },
   partner_details: {
-    title: "THEIR DETAILS",
-    subtitle: "Enter the details of the person you're interested in to calculate odds.",
-    name_ph: "Their Name",
-    cta: "CHECK COMPATIBILITY"
+    title: "TARGET IDENTITY",
+    subtitle: "Enter their details to calculate synchronicity and potential glitches.",
+    name_ph: "Partner's Name",
+    cta: "SYNC DATA >"
   },
   context: {
-    love_title: "WHAT'S THE SITUATION? (Optional)",
-    love_subtitle: "Dating? Crushing? Complicated? What specifically do you want to know?",
-    love_ph: "e.g., Just started dating, he's pulling away, is this long term?",
-    money_title: "REALITY CHECK (Optional)",
-    money_subtitle: "Burnout? Broke? Where does it hurt? Or skip to the answer.",
-    money_ph: "e.g., Hate my boss, stuck in junior role...",
-    cta: "DIG DEEPER"
+    love_title: "CURRENT STATUS",
+    love_subtitle: "What is the nature of your connection? Be specific for a deeper decode.",
+    love_ph: "e.g., Just started dating, mixed signals, looking for long-term potential...",
+    money_title: "PROFESSIONAL RADIUS",
+    money_subtitle: "What is your current field and the biggest friction point in your career?",
+    money_ph: "e.g., Marketing lead, feeling stagnant, considering a pivot...",
+    cta: "PROCEED"
   },
   final_key: {
-    title: "THE ELEPHANT IN THE ROOM (Optional)",
-    subtitle: "Ask the thing that keeps you up at night.",
-    love_ph: "Is he seeing someone else? Will he commit?",
-    money_ph: "Should I quit tomorrow? Will I fail?",
+    title: "THE FINAL QUERY",
+    subtitle: "Ask the one question that determines your peace of mind.",
+    love_ph: "Will we commit by the end of 2026? Is there a third party?",
+    money_ph: "Is my new venture going to scale? When is the peak wealth window?",
     cta: "DECODE DESTINY"
   },
   paywall: {
-    urgency: "Leaving now guarantees 3 more months of anxiety.",
+    urgency: "Leaving now results in missing your peak window of opportunity.",
     bullets: [
-      "The ONE move that will make or break your relationship in 2026.",
-      "Is marriage on the table for real? Your definitive timeline.",
-      "The *exact* date you need to make your power move, or lose out."
+      "The ONE critical event that will shift your trajectory in 2026.",
+      "Exact dates for high-probability success or relationship breakthroughs.",
+      "Strategic risk-avoidance guide tailored to your unique chart glitches."
     ],
-    disclaimer: "Reality check. You decide the outcome."
+    disclaimer: "Destiny is the blueprint; your choices are the execution."
   }
 };
