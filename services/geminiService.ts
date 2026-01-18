@@ -3,28 +3,39 @@ import { GoogleGenAI, Type } from "@google/genai";
 import { FormData, SajuResponse } from "../types";
 
 export const generateSajuReading = async (formData: FormData): Promise<SajuResponse> => {
-  // 가이드라인에 따라 process.env.API_KEY를 직접 사용합니다.
+  /**
+   * [보안 가이드]
+   * 가이드라인에 따라 API 키는 반드시 process.env.API_KEY로부터 가져옵니다.
+   * 이렇게 하면 소스 코드에는 키가 노출되지 않으며, Vercel 같은 호스팅 환경의 
+   * 'Environment Variables' 설정에서 안전하게 관리할 수 있습니다.
+   */
+  const apiKey = process.env.API_KEY;
+  
+  if (!apiKey) {
+    // 사용자가 설정을 잊었을 경우를 대비한 친절한 에러 메시지
+    throw new Error("API_KEY_NOT_FOUND: Please set the 'API_KEY' environment variable in your deployment settings and redeploy.");
+  }
 
-  const ai = new GoogleGenAI({ apiKey: import.meta.env.VITE_GEMINI_API_KEY, });
+  const ai = new GoogleGenAI({ apiKey });
   const isLove = formData.mode === 'LOVE';
 
   const systemInstruction = `
-    You are 'THE SOUL CODE', a high-speed premium destiny analyst.
+    You are 'THE SOUL CODE', a premium destiny analyst.
     Tone: Sophisticated, insightful, direct. 
     Constraint: STRICTLY ENGLISH. No other languages allowed.
-    Task: Decipher Saju charts and provide strategic life trajectory data.
-    ${isLove ? 'Focus: Relationship synchronicity and potential glitches.' : 'Focus: Wealth peaks, career pivots, and risk management.'}
+    Task: Decipher birth charts (Saju) and provide strategic life trajectory data.
+    ${isLove ? 'Focus: Deep relationship synchronicity and potential glitches.' : 'Focus: Wealth windows, career pivots, and risk avoidance.'}
     
-    CRITICAL: Always return a valid JSON object matching the provided schema exactly.
+    CRITICAL: Always return a complete, valid JSON object matching the provided schema exactly.
   `;
 
   const prompt = `
     Analyze User: ${JSON.stringify(formData.user)}
     ${formData.partner ? `Analyze Partner: ${JSON.stringify(formData.partner)}` : ''}
-    Context: ${isLove ? formData.relationshipStatus : formData.occupation}
+    Context: ${formData.mode === 'LOVE' ? formData.relationshipStatus : formData.occupation}
     Inquiry: ${formData.finalQuestion}
 
-    Generate a high-fidelity destiny analysis. Output in English only.
+    Generate a high-fidelity destiny analysis in English.
   `;
 
   const scoreSchema = {
@@ -37,7 +48,6 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
   };
 
   try {
-    // 텍스트 작업에 최적화된 gemini-3-flash-preview 모델 사용
     const response = await ai.models.generateContent({
       model: "gemini-3-flash-preview",
       contents: prompt,
@@ -154,7 +164,7 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
     const resultText = response.text;
     if (!resultText) throw new Error("Empty response from Soul Code engine.");
     
-    // JSON 파싱 전 클리닝
+    // JSON 파싱 전 클리닝 로직
     const cleanJson = resultText.replace(/```json|```/g, "").trim();
     return JSON.parse(cleanJson) as SajuResponse;
   } catch (error: any) {
