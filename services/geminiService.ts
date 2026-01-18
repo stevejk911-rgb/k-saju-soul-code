@@ -23,11 +23,12 @@ export const generateSajuReading = async (formData: FormData): Promise<SajuRespo
     Translate any traditional Saju concepts into high-fidelity English analytical terms.
   `;
 
+  // Define a fixed set of score properties to avoid "empty OBJECT properties" schema error
   const scoreSchema = {
     type: Type.OBJECT,
     properties: {
-      label: { type: Type.STRING },
-      stars: { type: Type.NUMBER }
+      label: { type: Type.STRING, description: "Display label for this dimension" },
+      stars: { type: Type.NUMBER, description: "Score from 1 to 5" }
     },
     required: ["label", "stars"]
   };
