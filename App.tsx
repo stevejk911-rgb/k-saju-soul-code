@@ -43,21 +43,22 @@ const App: React.FC = () => {
   const prevStep = () => setStep(prev => Math.max(0, prev - 1));
 
   const runAnalysis = async () => {
-    setStep(isLove ? 5 : 4); 
+    const loadingStep = isLove ? 5 : 4;
+    setStep(loadingStep); 
     setIsAnalyzing(true);
     
     try {
       const minTimePromise = new Promise(resolve => setTimeout(resolve, 3000));
-      // Fix: generateSajuReading only takes one argument (formData)
       const apiPromise = generateSajuReading(formData);
       
       const [_, response] = await Promise.all([minTimePromise, apiPromise]);
       setResult(response);
-      setStep(prev => prev + 1); 
-    } catch (e) {
-      console.error(e);
-      alert("The stars are clouded. Please try again.");
-      setStep(0);
+      setStep(loadingStep + 1); 
+    } catch (e: any) {
+      console.error("ANALYSIS_ERROR:", e);
+      alert(`The stars are clouded: ${e.message || 'Please try again later.'}`);
+      // Go back to the last interactive step instead of total reset
+      setStep(isLove ? 4 : 3);
     } finally {
       setIsAnalyzing(false);
     }
@@ -282,7 +283,7 @@ const App: React.FC = () => {
           className="w-full bg-white/5 border border-white/20 rounded-lg p-3 text-white placeholder-zinc-700 focus:outline-none focus:border-red-500 resize-none"
         />
         <div className="pt-4">
-           <Button onClick={runAnalysis}>
+           <Button onClick={runAnalysis} isLoading={isAnalyzing}>
              {COPY.final_key.cta}
            </Button>
         </div>
@@ -291,10 +292,10 @@ const App: React.FC = () => {
   };
 
   const renderAnalyzing = () => (
-    <div className="flex flex-col items-center justify-center text-center animate-pulse">
-       <Loader2 className="w-12 h-12 text-red-500 animate-spin mb-6" />
-       <h2 className="text-2xl font-serif text-white mb-2">Accessing The Soul Code...</h2>
-       <p className="text-sm text-zinc-400">Calculating future trajectory (2026+)</p>
+    <div className="flex flex-col items-center justify-center text-center animate-pulse py-12">
+       <Loader2 className="w-16 h-16 text-red-500 animate-spin mb-8" />
+       <h2 className="text-3xl font-heading font-black text-white mb-4 uppercase italic">Accessing Source Code</h2>
+       <p className="text-sm text-zinc-500 tracking-widest uppercase font-black">Decrypting future trajectory (2026+)</p>
     </div>
   );
 
@@ -323,12 +324,11 @@ const App: React.FC = () => {
       clientId: PAYPAL_CLIENT_ID,
       currency: "USD",
       intent: "capture",
-      components: "buttons",
-      vault: false
+      components: "buttons"
     }}>
       <Layout 
         onBack={prevStep} 
-        showBack={step > 0 && !result} 
+        showBack={step > 0 && !result && !isAnalyzing} 
         step={step} 
         totalSteps={totalSteps}
       >

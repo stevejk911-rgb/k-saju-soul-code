@@ -74,7 +74,7 @@ export interface LoveResult {
 }
 
 export interface SajuResponse {
-  mode: 'love' | 'money';
+  mode: 'LOVE' | 'MONEY';
   free: {
     headline: string;
     one_liner: string;
